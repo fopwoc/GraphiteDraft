@@ -1,0 +1,47 @@
+---
+import { existsSync, readFileSync } from "node:fs";
+import path from "node:path";
+import type { PageEntry } from "../lib/pages";
+import { routeFromId, titleFor } from "../lib/pages";
+
+interface Props {
+  page: PageEntry;
+}
+
+const { page } = Astro.props;
+const title = titleFor(page);
+const defaultIcon = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64"><style>path{stroke:#27272a}@media(prefers-color-scheme:dark){path{stroke:#fafafa}}</style><path fill="none" stroke-width="6" stroke-linejoin="round" stroke-linecap="round" d="M12 5h29l11 12v42H12zM41 5v13h11M20 31h24M20 43h18"/></svg>`;
+const contentDirectory = path.resolve(process.env.GRAPHITE_CONTENT_DIR || "./examples/content");
+const customIconPath = path.join(contentDirectory, "icon.svg");
+const hasCustomIcon = existsSync(customIconPath);
+const inlineIcon = import.meta.env.DEV || routeFromId(page.id) === "404.html";
+const favicon = hasCustomIcon && !inlineIcon
+  ? "/icon.svg"
+  : svgDataUrl(hasCustomIcon ? readFileSync(customIconPath, "utf8") : defaultIcon);
+
+function svgDataUrl(svg: string) {
+  return `data:image/svg+xml,${encodeURIComponent(svg)}`;
+}
+---
+
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width" />
+    <meta name="generator" content={Astro.generator} />
+    <meta name="theme-color" content="#fafaf9" media="(prefers-color-scheme: light)" />
+    <meta name="theme-color" content="#09090b" media="(prefers-color-scheme: dark)" />
+    <link rel="icon" href={favicon} />
+    <title>{title}</title>
+  </head>
+  <body class="m-0 min-h-screen bg-stone-50 text-zinc-800 font-sans leading-relaxed dark:bg-zinc-950 dark:text-zinc-200">
+    <main class="mx-auto min-w-0 w-[calc(100%-2rem)] max-w-3xl py-8 pb-24 sm:py-20 sm:pb-24">
+      <article class="prose prose-zinc max-w-none dark:prose-invert">
+        {page.data.title && <h1>{page.data.title}</h1>}
+        <slot />
+      </article>
+    </main>
+    <script src="../scripts/copy-code.ts"></script>
+  </body>
+</html>

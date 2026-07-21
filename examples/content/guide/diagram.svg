@@ -1,0 +1,5 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 80" role="img" aria-labelledby="title">
+  <title id="title">External Markdown becomes a static website</title>
+  <rect width="320" height="80" rx="8" fill="#315d9d"/>
+  <text x="160" y="48" fill="white" text-anchor="middle" font-family="system-ui, sans-serif" font-size="20">Markdown → Website</text>
+</svg>

@@ -1,0 +1,7 @@
+.git
+.github
+.astro
+dist
+examples
+node_modules
+.DS_Store

@@ -1,0 +1,62 @@
+import { mkdtemp, mkdir, readFile, rm, writeFile } from "node:fs/promises";
+import { tmpdir } from "node:os";
+import path from "node:path";
+import { spawnSync } from "node:child_process";
+
+const workspace = await mkdtemp(path.join(tmpdir(), "graphite-draft-cli-test-"));
+const cli = path.resolve("bin/graphite-draft.mjs");
+
+try {
+  const valid = path.join(workspace, "valid");
+  await mkdir(valid);
+  await writeFile(path.join(valid, "next.md"), "# Next\n");
+  await writeFile(path.join(valid, "index.md"), `# Valid
+
+[Next](next.md)
+
+\`\`\`mermaid
+flowchart LR
+  A --> B
+\`\`\`
+`);
+  expectStatus(["check", valid], 0);
+
+  const externalFontsOutput = path.join(workspace, "external-fonts-output");
+  expectStatus(["build", valid, externalFontsOutput, "--enable-external-fonts"], 0);
+  const externalFontsHtml = await readFile(path.join(externalFontsOutput, "index.html"), "utf8");
+  if (!externalFontsHtml.includes("fonts.googleapis.com")) {
+    throw new Error("External-font opt-in did not preserve the Mermaid font import");
+  }
+  if (!externalFontsHtml.includes('rel="icon" href="data:image/svg+xml,')) {
+    throw new Error("A build without icon.svg did not use the embedded fallback icon");
+  }
+
+  const brokenLink = path.join(workspace, "broken-link");
+  await mkdir(brokenLink);
+  await writeFile(path.join(brokenLink, "index.md"), "[Missing](missing.md)\n");
+  expectStatus(["check", brokenLink], 1);
+
+  const brokenMermaid = path.join(workspace, "broken-mermaid");
+  await mkdir(brokenMermaid);
+  await writeFile(path.join(brokenMermaid, "index.md"), "```mermaid\nnot a diagram\n```\n");
+  expectStatus(["check", brokenMermaid], 1);
+
+  const collision = path.join(workspace, "collision");
+  await mkdir(collision);
+  await writeFile(path.join(collision, "index.md"), "# Generated\n");
+  await writeFile(path.join(collision, "index.html"), "<!doctype html>Raw\n");
+  expectStatus(["check", collision], 1);
+} finally {
+  await rm(workspace, { recursive: true, force: true });
+}
+
+console.log("Graphite Draft CLI tests passed.");
+
+function expectStatus(args: string[], expected: number) {
+  const result = spawnSync("node", [cli, ...args], { encoding: "utf8" });
+  if (result.status !== expected) {
+    process.stdout.write(result.stdout || "");
+    process.stderr.write(result.stderr || "");
+    throw new Error(`Expected CLI status ${expected}, received ${result.status}`);
+  }
+}

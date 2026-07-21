@@ -1,0 +1,36 @@
+name: Graphite Draft
+description: Render an external Markdown directory as a static website.
+
+inputs:
+  source:
+    description: Markdown directory relative to the repository root.
+    required: false
+    default: .
+  output:
+    description: Static output directory relative to the repository root.
+    required: false
+    default: dist
+  site:
+    description: Canonical site origin, or auto for GitHub Pages.
+    required: false
+    default: auto
+  enable-external-fonts:
+    description: Allow Mermaid diagrams to load fonts from Google Fonts.
+    required: false
+    default: "false"
+
+outputs:
+  path:
+    description: Static output directory relative to the repository root.
+
+runs:
+  using: docker
+  image: Dockerfile
+  args:
+    - ${{ inputs.source }}
+    - ${{ inputs.output }}
+    - ${{ inputs.site }}
+    - ${{ inputs.enable-external-fonts }}
+branding:
+  icon: file-text
+  color: gray-dark
