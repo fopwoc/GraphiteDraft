@@ -7,12 +7,28 @@ const workspace = await mkdtemp(path.join(tmpdir(), "graphite-draft-cli-test-"))
 const cli = path.resolve("bin/graphite-draft.mjs");
 
 try {
+  await writeFile(
+    path.join(workspace, "tsconfig.json"),
+    JSON.stringify({ extends: "astro/tsconfigs/strict" })
+  );
   const valid = path.join(workspace, "valid");
   await mkdir(valid);
+  await mkdir(path.join(valid, "assets"));
+  await mkdir(path.join(valid, "features"));
   await writeFile(path.join(valid, "next.md"), "# Next\n");
+  await writeFile(
+    path.join(valid, "assets/diagram.svg"),
+    '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 10 10"></svg>\n'
+  );
+  await writeFile(
+    path.join(valid, "features/image.md"),
+    "# Image\n\n![Diagram](../assets/diagram.svg)\n"
+  );
   await writeFile(path.join(valid, "index.md"), `# Valid
 
 [Next](next.md)
+
+[Image](features/image.md)
 
 \`\`\`mermaid
 flowchart LR

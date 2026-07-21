@@ -15,6 +15,10 @@ export default defineConfig({
   compressHTML: true,
   trailingSlash: "always",
   vite: {
+    resolve: {
+      // Content is external and may sit beside an unrelated, unresolvable tsconfig.
+      tsconfigPaths: false
+    },
     build: {
       assetsInlineLimit: 0
     }
