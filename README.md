@@ -1,5 +1,7 @@
 # Graphite Draft
 
+[![Build](https://github.com/fopwoc/GraphiteDraft/actions/workflows/build.yml/badge.svg)](https://github.com/fopwoc/GraphiteDraft/actions/workflows/build.yml)
+
 I hate writing websites, so I did a thing to never do so anymore.
 
 Graphite Draft turns a directory of Markdown into a static website.
