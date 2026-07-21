@@ -1,4 +1,4 @@
-import { mkdtemp, mkdir, readFile, rm, writeFile } from "node:fs/promises";
+import { access, mkdtemp, mkdir, readFile, rm, writeFile } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import path from "node:path";
 import { spawnSync } from "node:child_process";
@@ -31,6 +31,25 @@ flowchart LR
     throw new Error("A build without icon.svg did not use the embedded fallback icon");
   }
 
+  const removedPageOutput = path.join(externalFontsOutput, "next/index.html");
+  await access(removedPageOutput);
+  await rm(path.join(valid, "next.md"));
+  await writeFile(path.join(valid, "index.md"), "# Valid\n");
+  expectStatus(["build", valid, externalFontsOutput], 1);
+  await access(removedPageOutput);
+  expectStatus([
+    "build",
+    valid,
+    externalFontsOutput,
+    "--force",
+    "--enable-external-fonts"
+  ], 0);
+  await expectMissing(removedPageOutput);
+
+  expectStatus(["check", valid, "--force"], 1);
+  expectStatus(["build", valid, workspace, "--force"], 1);
+  await access(path.join(valid, "index.md"));
+
   const brokenLink = path.join(workspace, "broken-link");
   await mkdir(brokenLink);
   await writeFile(path.join(brokenLink, "index.md"), "[Missing](missing.md)\n");
@@ -59,4 +78,14 @@ function expectStatus(args: string[], expected: number) {
     process.stderr.write(result.stderr || "");
     throw new Error(`Expected CLI status ${expected}, received ${result.status}`);
   }
+}
+
+async function expectMissing(file: string) {
+  try {
+    await access(file);
+  } catch (error) {
+    if (error && typeof error === "object" && "code" in error && error.code === "ENOENT") return;
+    throw error;
+  }
+  throw new Error(`Expected file to be removed: ${file}`);
 }

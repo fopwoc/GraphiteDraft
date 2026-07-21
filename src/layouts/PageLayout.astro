@@ -15,6 +15,7 @@ const contentDirectory = path.resolve(process.env.GRAPHITE_CONTENT_DIR || "./exa
 const customIconPath = path.join(contentDirectory, "icon.svg");
 const hasCustomIcon = existsSync(customIconPath);
 const inlineIcon = import.meta.env.DEV || routeFromId(page.id) === "404.html";
+const mermaidFont = process.env.GRAPHITE_ENABLE_EXTERNAL_FONTS === "true" ? "Inter" : undefined;
 const favicon = hasCustomIcon && !inlineIcon
   ? "/icon.svg"
   : svgDataUrl(hasCustomIcon ? readFileSync(customIconPath, "utf8") : defaultIcon);
@@ -32,6 +33,12 @@ function svgDataUrl(svg: string) {
     <meta name="generator" content={Astro.generator} />
     <meta name="theme-color" content="#fafaf9" media="(prefers-color-scheme: light)" />
     <meta name="theme-color" content="#09090b" media="(prefers-color-scheme: dark)" />
+    {mermaidFont && (
+      <link
+        rel="stylesheet"
+        href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap"
+      />
+    )}
     <link rel="icon" href={favicon} />
     <title>{title}</title>
   </head>

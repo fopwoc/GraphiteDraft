@@ -6,6 +6,7 @@ if [ -d /github/workspace ]; then
   output_path=${2:-dist}
   site_url=${3:-auto}
   external_fonts=${4:-false}
+  force_output=${5:-false}
   export GRAPHITE_CONTENT_DIR="$(realpath "/github/workspace/$source_path")"
   export GRAPHITE_OUTPUT_DIR="$(realpath -m "/github/workspace/$output_path")"
 
@@ -16,6 +17,10 @@ if [ -d /github/workspace ]; then
   case "$external_fonts" in
     true|false) export GRAPHITE_ENABLE_EXTERNAL_FONTS="$external_fonts" ;;
     *) echo "enable-external-fonts must be true or false" >&2; exit 1 ;;
+  esac
+  case "$force_output" in
+    true|false) export GRAPHITE_FORCE_OUTPUT="$force_output" ;;
+    *) echo "force must be true or false" >&2; exit 1 ;;
   esac
 
   if [ -n "${GITHUB_OUTPUT:-}" ]; then

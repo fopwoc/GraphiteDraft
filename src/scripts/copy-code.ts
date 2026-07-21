@@ -23,8 +23,11 @@ const copyCode = async (block: HTMLElement) => {
     field.remove();
   }
 
-  block.dataset.copyStatus = copied ? "Copied" : "Copy failed";
-  window.setTimeout(() => delete block.dataset.copyStatus, 1200);
+  const statusTarget = block.parentElement?.classList.contains("code-block")
+    ? block.parentElement
+    : block;
+  statusTarget.dataset.copyStatus = copied ? "Copied" : "Copy failed";
+  window.setTimeout(() => delete statusTarget.dataset.copyStatus, 1200);
 };
 
 for (const block of document.querySelectorAll<HTMLElement>("pre.astro-code")) {

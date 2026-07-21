@@ -12,6 +12,7 @@ export default defineConfig({
   cacheDir: process.env.GRAPHITE_CACHE_DIR || "./node_modules/.astro",
   outDir: process.env.GRAPHITE_BUILD_DIR || "./dist",
   output: "static",
+  compressHTML: true,
   trailingSlash: "always",
   vite: {
     build: {

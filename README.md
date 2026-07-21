@@ -2,6 +2,8 @@
 
 [![Build](https://github.com/fopwoc/GraphiteDraft/actions/workflows/build.yml/badge.svg)](https://github.com/fopwoc/GraphiteDraft/actions/workflows/build.yml)
 
+[View the rendered example](https://fopwoc.github.io/GraphiteDraft/example/)
+
 I hate writing websites, so I did a thing to never do so anymore.
 
 Graphite Draft turns a directory of Markdown into a static website.
@@ -60,11 +62,6 @@ on:
   push:
     branches: [main]
 
-permissions:
-  contents: read
-  pages: write
-  id-token: write
-
 concurrency:
   group: pages
   cancel-in-progress: true
@@ -72,32 +69,38 @@ concurrency:
 jobs:
   build:
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
     steps:
       - uses: actions/checkout@v6
       - name: Build website
-        uses: fopwoc/GraphiteDraft@v0
+        uses: fopwoc/GraphiteDraft@v1
         with:
           source: notes
           output: dist
-      - uses: actions/configure-pages@v5
       - uses: actions/upload-pages-artifact@v4
         with:
           path: dist
 
   deploy:
-    environment:
-      name: github-pages
-      url: ${{ steps.deployment.outputs.page_url }}
     runs-on: ubuntu-latest
     needs: build
+    environment: github-pages
+    permissions:
+      pages: write
+      id-token: write
     steps:
-      - name: Deploy
-        id: deployment
-        uses: actions/deploy-pages@v4
+      - uses: actions/deploy-pages@v4
 ```
 
 Change `source: notes` to the directory containing your Markdown. Then open your
 repository's **Settings → Pages** and select **GitHub Actions** as the source.
+
+The jobs are separated so the build has read-only repository access and only the
+deployment receives permission to publish. `id-token: write` lets GitHub issue a
+short-lived identity token containing the repository, branch, and environment;
+Pages uses those claims to verify that the workflow is allowed to deploy. It does
+not grant write access to the repository.
 
 Every push to `main` will validate the content, build the site, and publish it to
 GitHub Pages.
@@ -110,6 +113,7 @@ GitHub Pages.
 | `output` | `dist` | Directory where the static website is written |
 | `site` | `auto` | Canonical site origin; `auto` uses GitHub Pages |
 | `enable-external-fonts` | `false` | Allow Mermaid diagrams to load Google Fonts |
+| `force` | `false` | Replace a non-empty output directory instead of failing |
 
 The action exposes the final directory as the `path` output if another step
 needs it.
@@ -136,6 +140,10 @@ docker run --rm \
 
 The finished website will be in `./dist`. Both mount paths must be absolute;
 `$PWD` takes care of that on macOS and Linux.
+
+The output directory must be empty. To replace an existing build, pass
+`-e GRAPHITE_FORCE_OUTPUT=true`; the previous output is removed only after the
+new site has built successfully.
 
 Mermaid diagrams use system fonts by default, so the generated site does not
 contact an external font service. To opt in to Google Fonts:
@@ -184,12 +192,19 @@ Build the website:
 graphite-draft build ./notes ./dist
 ```
 
+To replace an existing non-empty output directory, add `--force`. Without it,
+the build stops instead of merging new files with stale output:
+
+```sh
+graphite-draft build ./notes ./dist --force
+```
+
 The first argument is the Markdown source directory. The second is the output
 directory and defaults to `./dist`:
 
 ```text
 graphite-draft check [source]
-graphite-draft build [source] [output] [--enable-external-fonts]
+graphite-draft build [source] [output] [--force] [--enable-external-fonts]
 ```
 
 You can also run it without a global installation:
@@ -222,8 +237,9 @@ The page starts here.
 - `404.md` or `404.mdx` becomes a self-contained `404.html`.
 - A root `icon.svg` becomes the favicon.
 - A Markdown image title becomes a visible caption.
+- In MDX, frontmatter must be the first block in the file, before imports.
 
-Fenced Mermaid blocks are rendered to SVG during the build:
+Fenced Mermaid blocks are rendered to static SVG during the build:
 
 ````md
 ```mermaid
@@ -232,9 +248,35 @@ flowchart LR
 ```
 ````
 
+Graphite Draft uses Mermaid 11 and supports its complete diagram grammar,
+including per-diagram YAML frontmatter:
+
+````md
+```mermaid
+---
+title: Example Git diagram
+---
+gitGraph
+  commit
+  branch develop
+  commit
+```
+````
+
+Graphite Draft bakes light and dark SVG variants into the page. Mermaid is not
+shipped to the browser.
+
 The default output also includes GitHub-flavored Markdown, syntax highlighting,
-copyable code blocks, heading anchors, responsive typography, and automatic
-light and dark modes.
+copyable code blocks, GitHub-style alerts (`NOTE`, `TIP`, `IMPORTANT`, `WARNING`,
+and `CAUTION`), heading anchors, responsive typography, and automatic light and
+dark modes.
+
+Use the same alert syntax as GitHub:
+
+```md
+> [!IMPORTANT]
+> This text can still contain **bold**, *italic*, links, and `code`.
+```
 
 ## The non-features are the point
 

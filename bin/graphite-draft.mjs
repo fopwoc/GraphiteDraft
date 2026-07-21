@@ -24,9 +24,13 @@ if (command !== "check" && command !== "build") {
   fail(`Unknown command: ${command}`);
 }
 
-const { positional, enableExternalFonts } = parseOptions(args);
+const { positional, enableExternalFonts, force } = parseOptions(args);
 const source = path.resolve(positional[0] || ".");
 await requireDirectory(source, "Markdown source");
+
+if (command === "check" && force) {
+  fail("--force can only be used with build");
+}
 
 const temporaryRoot = await mkdtemp(path.join(tmpdir(), "graphite-draft-"));
 const temporaryBuild = path.join(temporaryRoot, "build");
@@ -37,8 +41,8 @@ try {
     ? path.resolve(positional[1] || "dist")
     : temporaryBuild;
 
-  if (command === "build" && isSamePath(output, source)) {
-    fail("Output directory must not be the Markdown source directory itself");
+  if (command === "build" && isSameOrChild(source, output)) {
+    fail("Output directory must not contain the Markdown source directory");
   }
 
   const result = spawnSync(process.execPath, [path.join(packageRoot, "scripts/build.mjs")], {
@@ -50,6 +54,7 @@ try {
       GRAPHITE_CACHE_DIR: temporaryCache,
       GRAPHITE_CONTENT_DIR: source,
       GRAPHITE_ENABLE_EXTERNAL_FONTS: String(enableExternalFonts),
+      GRAPHITE_FORCE_OUTPUT: String(force),
       GRAPHITE_OUTPUT_DIR: output
     },
     encoding: "utf8"
@@ -79,8 +84,9 @@ async function requireDirectory(directory, label) {
   fail(`${label} is not a directory: ${directory}`);
 }
 
-function isSamePath(left, right) {
-  return path.relative(left, right) === "";
+function isSameOrChild(candidate, parent) {
+  const relative = path.relative(parent, candidate);
+  return relative === "" || (!relative.startsWith("..") && !path.isAbsolute(relative));
 }
 
 function hasAstroRenderError(stderr) {
@@ -89,11 +95,14 @@ function hasAstroRenderError(stderr) {
 
 function parseOptions(values) {
   let enableExternalFonts = process.env.GRAPHITE_ENABLE_EXTERNAL_FONTS === "true";
+  let force = false;
   const positional = [];
 
   for (const value of values) {
     if (value === "--enable-external-fonts") {
       enableExternalFonts = true;
+    } else if (value === "--force") {
+      force = true;
     } else if (value.startsWith("--enable-external-fonts=")) {
       const setting = value.slice(value.indexOf("=") + 1);
       if (setting !== "true" && setting !== "false") {
@@ -106,7 +115,7 @@ function parseOptions(values) {
       positional.push(value);
     }
   }
-  return { positional, enableExternalFonts };
+  return { positional, enableExternalFonts, force };
 }
 
 function fail(message) {
@@ -119,13 +128,14 @@ function printHelp() {
 
 Usage:
   graphite-draft check [source]
-  graphite-draft build [source] [output] [--enable-external-fonts]
+  graphite-draft build [source] [output] [--force] [--enable-external-fonts]
 
 Commands:
   check  Fully render Markdown into a temporary directory and validate it
   build  Render Markdown into output (default: ./dist)
 
 Options:
+  --force                  Replace a non-empty output directory
   --enable-external-fonts  Allow Mermaid to load fonts from Google Fonts
 `);
 }

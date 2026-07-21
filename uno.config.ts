@@ -4,7 +4,26 @@ import { systemMonoFontStack, systemSansFontStack } from "./src/lib/fonts.mjs";
 export default defineConfig({
   presets: [
     presetWind4({ dark: "media" }),
-    presetTypography()
+    presetTypography({
+      cssExtend: {
+        blockquote: {
+          color: "inherit",
+          "font-style": "normal",
+          "font-weight": "400",
+          quotes: "none"
+        },
+        "blockquote p:first-of-type::before": { content: "none" },
+        "blockquote p:last-of-type::after": { content: "none" },
+        code: {
+          "border-radius": ".3em",
+          background: "var(--graphite-inline-code-bg)",
+          padding: ".12em .35em",
+          "font-weight": "500"
+        },
+        "code::before": { content: "none" },
+        "code::after": { content: "none" }
+      }
+    })
   ],
   preflights: [
     {
@@ -17,7 +36,13 @@ export default defineConfig({
           --graphite-link: #1d4ed8;
           --graphite-border: #d6d3d1;
           --graphite-soft-bg: #f5f5f4;
+          --graphite-inline-code-bg: #e7e5e4;
           --graphite-mark-bg: #fef08a;
+          --graphite-note: #2563eb;
+          --graphite-tip: #15803d;
+          --graphite-important: #7c3aed;
+          --graphite-warning: #b45309;
+          --graphite-caution: #dc2626;
           --graphite-diagram-bg: transparent;
           --graphite-diagram-fg: #27272a;
           --graphite-diagram-line: #71717a;
@@ -51,11 +76,54 @@ export default defineConfig({
         }
         .prose :is(h1, h2, h3, h4, h5, h6):hover .heading-anchor { opacity: .55; }
         .prose blockquote {
-          border-inline-start-color: var(--graphite-link);
-          border-radius: 0 .375rem .375rem 0;
-          background: var(--graphite-soft-bg);
-          padding-block: .25rem;
-          padding-inline-end: 1rem;
+          border: 1px solid var(--graphite-border);
+          border-inline-start: .25rem solid var(--graphite-link);
+          border-radius: .625rem;
+          background: color-mix(in srgb, var(--graphite-soft-bg) 88%, transparent);
+          box-shadow: 0 1px 2px color-mix(in srgb, currentColor 7%, transparent);
+          padding: .75rem 1rem;
+        }
+        .prose blockquote > :first-child { margin-block-start: 0; }
+        .prose blockquote > :last-child { margin-block-end: 0; }
+        .prose .markdown-alert { --graphite-alert: var(--graphite-note); }
+        .prose .markdown-alert-note { --graphite-alert: var(--graphite-note); }
+        .prose .markdown-alert-tip { --graphite-alert: var(--graphite-tip); }
+        .prose .markdown-alert-important { --graphite-alert: var(--graphite-important); }
+        .prose .markdown-alert-warning { --graphite-alert: var(--graphite-warning); }
+        .prose .markdown-alert-caution { --graphite-alert: var(--graphite-caution); }
+        .prose .markdown-alert {
+          border-inline-start-color: var(--graphite-alert);
+          background: color-mix(in srgb, var(--graphite-alert) 8%, var(--graphite-soft-bg));
+        }
+        .prose .markdown-alert-title {
+          display: flex;
+          align-items: center;
+          gap: .5rem;
+          color: var(--graphite-alert);
+          font-size: .875rem;
+          font-weight: 700;
+          letter-spacing: .025em;
+        }
+        .prose .markdown-alert-title::before {
+          width: .55rem;
+          height: .55rem;
+          flex: none;
+          border-radius: 999px;
+          background: currentColor;
+          box-shadow: 0 0 0 .2rem color-mix(in srgb, currentColor 16%, transparent);
+          content: "";
+        }
+        .prose li.task-list-item {
+          list-style: none;
+        }
+        .prose li.task-list-item::marker { content: ""; }
+        .prose li.task-list-item > input[type="checkbox"]:first-child {
+          width: 1rem;
+          height: 1rem;
+          margin: 0 .6rem 0 -1.45rem;
+          vertical-align: -.14em;
+          accent-color: var(--graphite-link);
+          opacity: 1;
         }
         .prose table {
           display: block;
@@ -97,8 +165,21 @@ export default defineConfig({
           color: color-mix(in srgb, currentColor 70%, transparent);
           font-size: .875rem;
         }
-        pre.astro-code { position: relative; cursor: copy; }
-        pre.astro-code::after {
+        .astro-code,
+        .astro-code span {
+          color: var(--shiki-light) !important;
+          background-color: var(--shiki-light-bg) !important;
+          font-style: var(--shiki-light-font-style) !important;
+          font-weight: var(--shiki-light-font-weight) !important;
+          text-decoration: var(--shiki-light-text-decoration) !important;
+        }
+        .prose .code-block {
+          position: relative;
+          margin-block: 1.7142857em;
+        }
+        .prose .code-block pre.astro-code { margin-block: 0; }
+        pre.astro-code { cursor: copy; }
+        .code-block::after {
           content: attr(data-language);
           position: absolute;
           inset-block-start: .5rem;
@@ -112,17 +193,35 @@ export default defineConfig({
           line-height: 1.25rem;
           pointer-events: none;
         }
-        pre.astro-code[data-copy-status]::after { content: attr(data-copy-status); }
-        .mermaid { overflow-x: auto; padding-block: 1rem; text-align: center; }
+        .code-block[data-copy-status]::after { content: attr(data-copy-status); }
+        .mermaid-diagram {
+          overflow-x: auto;
+          margin-block: 1.5rem;
+          padding-block: 1rem;
+        }
+        .mermaid-diagram svg {
+          display: block;
+          height: auto;
+          margin-inline: auto;
+        }
+        .mermaid-theme-dark { display: none; }
         @media (hover: none) {
           .prose .heading-anchor { opacity: .4; }
         }
         @media (prefers-color-scheme: dark) {
+          .mermaid-theme-light { display: none; }
+          .mermaid-theme-dark { display: block; }
           :root {
             --graphite-link: #60a5fa;
             --graphite-border: #3f3f46;
             --graphite-soft-bg: #18181b;
+            --graphite-inline-code-bg: #27272a;
             --graphite-mark-bg: #713f12;
+            --graphite-note: #60a5fa;
+            --graphite-tip: #4ade80;
+            --graphite-important: #a78bfa;
+            --graphite-warning: #fbbf24;
+            --graphite-caution: #f87171;
             --graphite-diagram-fg: #e4e4e7;
             --graphite-diagram-line: #a1a1aa;
             --graphite-diagram-accent: #60a5fa;

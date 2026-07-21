@@ -1,0 +1,30 @@
+#todo-app { display: grid; gap: 1rem; }
+#todo-app h2, #todo-app p, #todo-app ul { margin: 0; }
+#todo-form { display: grid; gap: .4rem; }
+#todo-form label { font-weight: 650; }
+.todo-controls { display: flex; gap: .6rem; }
+.todo-controls input {
+  min-width: 0;
+  flex: 1;
+  border: 1px solid var(--graphite-border);
+  border-radius: .55rem;
+  background: var(--graphite-soft-bg);
+  padding: .65rem .8rem;
+  color: inherit;
+  font: inherit;
+}
+#todo-app button {
+  border: 1px solid var(--graphite-border);
+  border-radius: .55rem;
+  background: var(--graphite-soft-bg);
+  padding: .55rem .8rem;
+  color: inherit;
+  font: inherit;
+  font-weight: 650;
+  cursor: pointer;
+}
+#todo-list { display: grid; gap: .5rem; padding-inline-start: 1.45rem; }
+#todo-list li { padding-inline-end: 5rem; position: relative; }
+#todo-list li[data-done="true"] span { opacity: .6; text-decoration: line-through; }
+#todo-list li button { position: absolute; inset-block-start: -.3rem; inset-inline-end: 0; }
+#todo-clear { justify-self: start; }

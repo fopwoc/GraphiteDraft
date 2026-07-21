@@ -18,6 +18,10 @@ inputs:
     description: Allow Mermaid diagrams to load fonts from Google Fonts.
     required: false
     default: "false"
+  force:
+    description: Replace a non-empty output directory instead of failing.
+    required: false
+    default: "false"
 
 outputs:
   path:
@@ -31,6 +35,7 @@ runs:
     - ${{ inputs.output }}
     - ${{ inputs.site }}
     - ${{ inputs.enable-external-fonts }}
+    - ${{ inputs.force }}
 branding:
   icon: file-text
   color: gray-dark

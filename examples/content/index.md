@@ -1,45 +1,18 @@
 ---
-title: Graphite Draft
+title: Graphite Draft examples
 ---
 
-Point Graphite Draft at a Markdown directory. Its hierarchy becomes the website hierarchy.
+Each page demonstrates one case Graphite Draft can handle.
 
-There is no generated navigation. The links written in your Markdown are the website navigation.
-
-## Zero-rewrite Markdown
-
-Relative links continue to work when pages become clean URLs:
-
-- [Read the guide](./guide/getting-started.md)
-- Images can live beside Markdown: `![Alt text](./image.png)`
-- Other relative files are copied into the static output
-
-## Code highlighting
-
-```ts
-const pages = await build("./content");
-```
-
-## Mermaid
-
-```mermaid
-flowchart LR
-  Markdown --> Graphite[Graphite Draft]
-  Graphite --> Static[Static website]
-```
-
-## Native elements
-
-> The default presentation stays quiet so the Markdown remains the focus.
-
-| Input | Output |
-| --- | --- |
-| Markdown | Static HTML |
-| Mermaid | Inline SVG |
-
-<details>
-  <summary>Small details stay native</summary>
-  No component runtime is required.
-</details>
-
-Press <kbd>Enter</kbd> on a code block to copy it, or <mark>just click it</mark>.
+- [Frontmatter and page titles](./features/frontmatter.md)
+- [Text formatting and native HTML](./features/text.md)
+- [Links, clean routes, and nested directories](./features/links-and-routing.md)
+- [Blockquotes and GitHub-style alerts](./features/alerts.md)
+- [Lists and task lists](./features/lists.md)
+- [Tables and expandable details](./features/tables-and-details.md)
+- [Highlighted, copyable code blocks](./features/code.md)
+- [Mermaid diagrams and diagram metadata](./features/mermaid.md)
+- [Images, captions, and copied files](./features/assets.md)
+- [A custom MDX 404 page](./404.mdx)
+- [A Markdown kitchen sink](./features/kitchen-sink.md)
+- [An interactive MDX todo list because why not](./features/todo.mdx)

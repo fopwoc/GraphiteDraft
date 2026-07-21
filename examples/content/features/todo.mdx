@@ -1,0 +1,28 @@
+---
+title: Interactive MDX todo list
+---
+
+import './todo-app.css'
+
+This page opts into client-side JavaScript. Add tasks, toggle them, delete them,
+and reload the page: the list is stored in `localStorage`.
+
+[Back to examples](../index.md)
+
+----
+
+<section id="todo-app" aria-labelledby="todo-heading">
+  <h2 id="todo-heading">Things that definitely need doing</h2>
+  <form id="todo-form">
+    <label htmlFor="todo-input">New task</label>
+    <div className="todo-controls">
+      <input id="todo-input" name="task" type="text" placeholder="Write something ambitious" required />
+      <button type="submit">Add</button>
+    </div>
+  </form>
+  <p id="todo-empty">Nothing here. Suspiciously productive.</p>
+  <ul id="todo-list" className="contains-task-list"></ul>
+  <button id="todo-clear" type="button">Clear completed</button>
+</section>
+
+<script src="/features/todo-app.js"></script>

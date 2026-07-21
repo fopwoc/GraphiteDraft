@@ -1,21 +1,60 @@
 import { access, cp, mkdir, readFile, readdir, rm, writeFile } from "node:fs/promises";
 import path from "node:path";
+import { minify } from "html-minifier-terser";
 
 const source = path.resolve(process.env.GRAPHITE_CONTENT_DIR || "./examples/content");
 const buildOutput = path.resolve(process.env.GRAPHITE_BUILD_DIR || "./dist");
 const requestedOutput = process.env.GRAPHITE_OUTPUT_DIR
   ? path.resolve(process.env.GRAPHITE_OUTPUT_DIR)
   : buildOutput;
+const forceOutput = parseBooleanEnvironment("GRAPHITE_FORCE_OUTPUT", false);
 
 await flatten404(buildOutput);
 await rewriteHtmlUrls(buildOutput);
 await inline404Styles(buildOutput);
 await inline404Scripts(buildOutput);
+await minifyGeneratedHtml(buildOutput);
 await copyAssets(source, buildOutput);
 
 if (requestedOutput !== buildOutput) {
-  await mkdir(requestedOutput, { recursive: true });
+  assertSafeOutput(requestedOutput);
+  if (await pathExists(requestedOutput)) {
+    if (!forceOutput && !(await isEmptyDirectory(requestedOutput))) {
+      throw new Error(
+        `Output directory is not empty: ${requestedOutput}. Use --force to replace it.`
+      );
+    }
+    await rm(requestedOutput, { recursive: true, force: true });
+  }
   await cp(buildOutput, requestedOutput, { recursive: true, force: true });
+}
+
+function assertSafeOutput(output) {
+  if (output === path.parse(output).root) {
+    throw new Error(`Refusing to replace filesystem root: ${output}`);
+  }
+  if (isSameOrChild(source, output)) {
+    throw new Error(`Output directory must not contain the Markdown source directory: ${output}`);
+  }
+}
+
+async function isEmptyDirectory(directory) {
+  try {
+    return (await readdir(directory)).length === 0;
+  } catch (error) {
+    if (error && typeof error === "object" && "code" in error && error.code === "ENOTDIR") {
+      return false;
+    }
+    throw error;
+  }
+}
+
+function parseBooleanEnvironment(name, fallback) {
+  const value = process.env[name];
+  if (value === undefined || value === "") return fallback;
+  if (value === "true") return true;
+  if (value === "false") return false;
+  throw new Error(`${name} must be true or false`);
 }
 
 async function copyAssets(directory, destination) {
@@ -84,6 +123,27 @@ async function rewriteHtmlUrls(directory) {
           `srcset="${rewriteSrcset(file, value)}"`
         ));
       await writeFile(file, rewritten);
+    }
+  }
+}
+
+async function minifyGeneratedHtml(directory) {
+  for (const entry of await readdir(directory, { withFileTypes: true })) {
+    const file = path.join(directory, entry.name);
+    if (entry.isDirectory()) {
+      await minifyGeneratedHtml(file);
+    } else if (entry.name.endsWith(".html")) {
+      const html = await readFile(file, "utf8");
+      const minimized = await minify(html, {
+        collapseWhitespace: true,
+        ignoreCustomFragments: [/<code(?:\s[^>]*)?>[\s\S]*?<\/code>/i],
+        removeComments: true,
+        removeRedundantAttributes: true,
+        removeScriptTypeAttributes: true,
+        removeStyleLinkTypeAttributes: true,
+        useShortDoctype: true
+      });
+      await writeFile(file, minimized);
     }
   }
 }
