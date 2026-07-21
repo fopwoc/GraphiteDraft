@@ -78,7 +78,7 @@ jobs:
         with:
           source: notes
           output: dist
-      - uses: actions/upload-pages-artifact@v4
+      - uses: actions/upload-pages-artifact@v5
         with:
           path: dist
 
@@ -90,7 +90,7 @@ jobs:
       pages: write
       id-token: write
     steps:
-      - uses: actions/deploy-pages@v4
+      - uses: actions/deploy-pages@v5
 ```
 
 Change `source: notes` to the directory containing your Markdown. Then open your
