@@ -1,9 +1,8 @@
-name: Deploy Markdown to GitHub Pages
+name: Deploy README to GitHub Pages
 
 on:
   push:
     branches: [main]
-  workflow_dispatch:
 
 permissions:
   contents: read
@@ -18,14 +17,18 @@ jobs:
   build:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
-      - name: Render example content
+      - uses: actions/checkout@v6
+      - name: Prepare README as the home page
+        run: |
+          mkdir -p .graphite-pages
+          cp README.md .graphite-pages/index.md
+      - name: Render README with Graphite Draft
         uses: ./
         with:
-          source: examples/content
+          source: .graphite-pages
           output: dist
       - uses: actions/configure-pages@v5
-      - uses: actions/upload-pages-artifact@v3
+      - uses: actions/upload-pages-artifact@v4
         with:
           path: dist
 

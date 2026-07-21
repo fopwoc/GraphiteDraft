@@ -57,7 +57,6 @@ name: Publish Markdown
 on:
   push:
     branches: [main]
-  workflow_dispatch:
 
 permissions:
   contents: read
@@ -79,7 +78,7 @@ jobs:
           source: notes
           output: dist
       - uses: actions/configure-pages@v5
-      - uses: actions/upload-pages-artifact@v3
+      - uses: actions/upload-pages-artifact@v4
         with:
           path: dist
 
@@ -99,7 +98,7 @@ Change `source: notes` to the directory containing your Markdown. Then open your
 repository's **Settings → Pages** and select **GitHub Actions** as the source.
 
 Every push to `main` will validate the content, build the site, and publish it to
-GitHub Pages. You can also run the workflow manually from the **Actions** tab.
+GitHub Pages.
 
 ### Action inputs
 

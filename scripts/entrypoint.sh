@@ -23,4 +23,5 @@ if [ -d /github/workspace ]; then
   fi
 fi
 
+cd /app
 exec bun run build
