@@ -36,6 +36,10 @@ try {
     "utf8"
   );
   const todoHtml = await readFile(path.join(output, "features/todo/index.html"), "utf8");
+  const frontmatterHtml = await readFile(
+    path.join(output, "features/frontmatter/index.html"),
+    "utf8"
+  );
   const todoScript = await readFile(path.join(output, "features/todo-app.js"), "utf8");
   const binary = await readFile(path.join(output, "assets/sample.bin"));
   const sourceBinary = await readFile(path.resolve("examples/content/assets/sample.bin"));
@@ -98,6 +102,8 @@ try {
   assertIncludes(alertsHtml, 'class="markdown-alert markdown-alert-important"');
   assertIncludes(alertsHtml, 'class="markdown-alert markdown-alert-caution"');
   assertIncludes(todoHtml, '<title>Interactive MDX todo list</title>');
+  assertExcludes(todoHtml, '<h1>Interactive MDX todo list</h1>');
+  assertIncludes(frontmatterHtml, '<h1>Frontmatter controls the page title</h1>');
   assertIncludes(todoHtml, 'id="todo-input"');
   assertIncludes(todoHtml, '<button type="submit">Add</button>');
   assertIncludes(todoHtml, 'src="../todo-app.js"');
