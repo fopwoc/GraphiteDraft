@@ -47,10 +47,10 @@
     "prepublishOnly": "bun run test"
   },
   "dependencies": {
-    "@astrojs/markdown-remark": "7.2.1",
-    "@astrojs/mdx": "7.0.4",
+    "@astrojs/markdown-remark": "7.2.2",
+    "@astrojs/mdx": "7.0.5",
     "@unocss/astro": "66.7.5",
-    "astro": "7.1.4",
+    "astro": "7.1.6",
     "happy-dom": "20.11.1",
     "html-minifier-terser": "7.2.0",
     "isomorphic-mermaid": "0.1.1",
