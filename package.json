@@ -47,20 +47,20 @@
     "prepublishOnly": "bun run test"
   },
   "dependencies": {
-    "@astrojs/markdown-remark": "7.2.2",
-    "@astrojs/mdx": "7.0.5",
-    "@unocss/astro": "66.7.5",
-    "astro": "7.2.0",
-    "happy-dom": "20.11.1",
+    "@astrojs/markdown-remark": "7.2.4",
+    "@astrojs/mdx": "7.0.7",
+    "@unocss/astro": "66.8.0",
+    "astro": "7.2.4",
+    "happy-dom": "20.11.6",
     "html-minifier-terser": "7.2.0",
     "isomorphic-mermaid": "0.1.1",
-    "mermaid": "11.16.1",
-    "unocss": "66.7.5",
+    "mermaid": "11.17.0",
+    "unocss": "66.8.0",
     "zod": "4.4.3"
   },
   "devDependencies": {
     "@astrojs/check": "0.9.10",
-    "@types/node": "26.1.2",
+    "@types/node": "26.2.0",
     "typescript": "6.0.3"
   },
   "engines": {
