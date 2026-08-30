@@ -14,5 +14,5 @@
     "test:smoke": "bun run --cwd packages/graphite-draft test:smoke",
     "version:resolve": "node tools/resolve-version.mjs"
   },
-  "packageManager": "bun@1.3.14"
+  "packageManager": "bun@1.4.0"
 }
