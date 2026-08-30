@@ -7,6 +7,9 @@ const workspace = await mkdtemp(path.join(tmpdir(), "graphite-draft-cli-test-"))
 const cli = path.resolve("bin/graphite-draft.mjs");
 
 try {
+  const packageJson = JSON.parse(await readFile(path.resolve("package.json"), "utf8"));
+  expectOutput(["--version"], `${packageJson.buildIdentity || packageJson.version}\n`);
+
   await writeFile(
     path.join(workspace, "tsconfig.json"),
     JSON.stringify({ extends: "astro/tsconfigs/strict" })
@@ -93,6 +96,15 @@ function expectStatus(args: string[], expected: number) {
     process.stdout.write(result.stdout || "");
     process.stderr.write(result.stderr || "");
     throw new Error(`Expected CLI status ${expected}, received ${result.status}`);
+  }
+}
+
+function expectOutput(args: string[], expected: string) {
+  const result = spawnSync("node", [cli, ...args], { encoding: "utf8" });
+  if (result.status !== 0 || result.stdout !== expected) {
+    process.stdout.write(result.stdout || "");
+    process.stderr.write(result.stderr || "");
+    throw new Error(`Expected CLI output ${JSON.stringify(expected)}`);
   }
 }
 

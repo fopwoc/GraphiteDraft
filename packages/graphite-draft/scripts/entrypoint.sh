@@ -28,5 +28,5 @@ if [ -d /github/workspace ]; then
   fi
 fi
 
-cd /app
+cd /app/packages/graphite-draft
 exec bun run build

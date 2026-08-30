@@ -1,5 +1,5 @@
 import { defineConfig, presetTypography, presetWind4 } from "unocss";
-import { systemMonoFontStack, systemSansFontStack } from "./src/lib/fonts.mjs";
+import { systemMonoFontStack, systemSansFontStack } from "./src/theme/fonts.mjs";
 
 export default defineConfig({
   presets: [

@@ -2,19 +2,22 @@ import { defineConfig } from "astro/config";
 import mdx from "@astrojs/mdx";
 import { rehypeHeadingIds, unified } from "@astrojs/markdown-remark";
 import UnoCSS from "unocss/astro";
-import { remarkGraphiteLinks } from "./src/lib/remark-graphite-links.mjs";
-import { remarkGraphiteMermaid } from "./src/lib/remark-graphite-mermaid.mjs";
-import { rehypeGraphiteDocument } from "./src/lib/rehype-graphite-document.mjs";
+import { rehypeGraphiteDocument } from "./src/markdown/rehype-graphite-document.mjs";
+import { remarkGraphiteLinks } from "./src/markdown/remark-graphite-links.mjs";
+import { remarkGraphiteMermaid } from "./src/markdown/remark-graphite-mermaid.mjs";
+
+const cacheDirectory = process.env.GRAPHITE_CACHE_DIR || "./node_modules/.astro";
 
 export default defineConfig({
   site: process.env.SITE_URL || "http://localhost:4321",
   base: "/",
-  cacheDir: process.env.GRAPHITE_CACHE_DIR || "./node_modules/.astro",
+  cacheDir: cacheDirectory,
   outDir: process.env.GRAPHITE_BUILD_DIR || "./dist",
   output: "static",
   compressHTML: true,
   trailingSlash: "always",
   vite: {
+    cacheDir: `${cacheDirectory}/vite`,
     resolve: {
       // Content is external and may sit beside an unrelated, unresolvable tsconfig.
       tsconfigPaths: false
@@ -36,7 +39,7 @@ export default defineConfig({
       gfm: true,
       remarkPlugins: [
         [remarkGraphiteLinks, {
-          contentDirectory: process.env.GRAPHITE_CONTENT_DIR || "./examples/content"
+          contentDirectory: process.env.GRAPHITE_CONTENT_DIR || "../../examples/content"
         }],
         [remarkGraphiteMermaid, {
           enableExternalFonts: process.env.GRAPHITE_ENABLE_EXTERNAL_FONTS === "true"

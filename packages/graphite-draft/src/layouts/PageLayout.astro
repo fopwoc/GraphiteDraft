@@ -1,8 +1,9 @@
 ---
 import { existsSync, readFileSync } from "node:fs";
 import path from "node:path";
-import type { PageEntry } from "../lib/pages";
-import { routeFromId, titleFor } from "../lib/pages";
+import { buildIdentity } from "../build/identity.mjs";
+import type { PageEntry } from "../content/pages";
+import { routeFromId, titleFor } from "../content/pages";
 
 interface Props {
   page: PageEntry;
@@ -12,7 +13,7 @@ const { page } = Astro.props;
 const title = titleFor(page);
 const showFrontmatterTitle = !page.filePath?.toLowerCase().endsWith(".mdx");
 const defaultIcon = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64"><style>path{stroke:#27272a}@media(prefers-color-scheme:dark){path{stroke:#fafafa}}</style><path fill="none" stroke-width="6" stroke-linejoin="round" stroke-linecap="round" d="M12 5h29l11 12v42H12zM41 5v13h11M20 31h24M20 43h18"/></svg>`;
-const contentDirectory = path.resolve(process.env.GRAPHITE_CONTENT_DIR || "./examples/content");
+const contentDirectory = path.resolve(process.env.GRAPHITE_CONTENT_DIR || "../../examples/content");
 const customIconPath = path.join(contentDirectory, "icon.svg");
 const hasCustomIcon = existsSync(customIconPath);
 const inlineIcon = import.meta.env.DEV || routeFromId(page.id) === "404.html";
@@ -31,7 +32,7 @@ function svgDataUrl(svg: string) {
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width" />
-    <meta name="generator" content={Astro.generator} />
+    <meta name="generator" content={`Graphite Draft ${buildIdentity}`} />
     <meta name="theme-color" content="#fafaf9" media="(prefers-color-scheme: light)" />
     <meta name="theme-color" content="#09090b" media="(prefers-color-scheme: dark)" />
     {mermaidFont && (

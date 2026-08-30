@@ -15,6 +15,9 @@ framework shipped to the browser.
 
 Write Markdown. Get a website.
 
+> [!NOTE]
+> This project contains AI-generated code. See [AI_USAGE.md](AI_USAGE.md) for details.
+
 ## What it does
 
 Given this:
@@ -72,9 +75,9 @@ jobs:
     permissions:
       contents: read
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@v7
       - name: Build website
-        uses: fopwoc/GraphiteDraft@v1
+        uses: fopwoc/GraphiteDraft@1
         with:
           source: notes
           output: dist
@@ -156,8 +159,8 @@ docker run --rm \
   ghcr.io/fopwoc/graphitedraft:latest
 ```
 
-For reproducible builds, replace `latest` with a full release such as `0.1.0`,
-or follow a compatible release line with `0.1` or `0`.
+For reproducible builds, replace `latest` with a full release such as `1.1.1`,
+or follow a compatible release line with `1.1` or `1`.
 
 To build the image yourself instead:
 
@@ -288,3 +291,15 @@ Your files are the content model. Your links are the navigation. The defaults ar
 the theme.
 
 That is the whole thing.
+
+## Develop
+
+The repository is a Bun workspace. The publishable renderer lives in
+`packages/graphite-draft`; examples remain outside the package so they cannot
+leak into npm or Docker distributions.
+
+```sh
+bun install --frozen-lockfile
+bun run test
+npm pack --dry-run --workspace packages/graphite-draft
+```

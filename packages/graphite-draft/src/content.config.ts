@@ -2,7 +2,7 @@ import { defineCollection } from "astro:content";
 import { glob } from "astro/loaders";
 import { z } from "zod";
 
-const contentDirectory = process.env.GRAPHITE_CONTENT_DIR || "./examples/content";
+const contentDirectory = process.env.GRAPHITE_CONTENT_DIR || "../../examples/content";
 
 const pages = defineCollection({
   loader: glob({

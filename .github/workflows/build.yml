@@ -4,11 +4,15 @@ on:
   push:
     branches: [main]
     paths-ignore:
-      - README.md
+      - "*.md"
+      - COPYRIGHT
+      - LICENSE
   pull_request:
     branches: [main]
     paths-ignore:
-      - README.md
+      - "*.md"
+      - COPYRIGHT
+      - LICENSE
 
 permissions:
   contents: read
@@ -30,7 +34,17 @@ jobs:
       - uses: oven-sh/setup-bun@v2
         with:
           bun-version: "1.3.14"
+      - name: Resolve development build identity
+        run: node tools/resolve-version.mjs --write-package
       - run: bun install --frozen-lockfile
       - run: bun run test
-      - name: Verify npm package contents
-        run: npm pack --dry-run
+      - name: Pack npm artifact
+        run: |
+          mkdir -p artifacts
+          npm pack --workspace packages/graphite-draft --pack-destination artifacts
+      - uses: actions/upload-artifact@v6
+        with:
+          name: npm-package
+          path: artifacts/*.tgz
+          if-no-files-found: error
+          retention-days: 3

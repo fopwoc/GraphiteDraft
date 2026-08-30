@@ -1,7 +1,7 @@
 ---
 import { getCollection, render } from "astro:content";
 import PageLayout from "../layouts/PageLayout.astro";
-import { routeFromId } from "../lib/pages";
+import { routeFromId } from "../content/pages";
 
 export async function getStaticPaths() {
   const pages = (await getCollection("pages")).filter((page) => !page.data.draft);

@@ -5,10 +5,16 @@ import { spawnSync } from "node:child_process";
 
 const workspace = await mkdtemp(path.join(tmpdir(), "graphite-draft-smoke-"));
 const output = path.join(workspace, "output");
+const exampleContent = path.resolve("../../examples/content");
+const packageJson = JSON.parse(await readFile(path.resolve("package.json"), "utf8"));
+const buildIdentity = process.env.GRAPHITE_VERSION
+  || packageJson.buildIdentity
+  || packageJson.version;
 try {
   const result = spawnSync(process.execPath, ["run", "build"], {
     env: {
       ...process.env,
+      GRAPHITE_CONTENT_DIR: exampleContent,
       GRAPHITE_OUTPUT_DIR: output,
       GRAPHITE_CACHE_DIR: path.join(workspace, ".astro-cache")
     },
@@ -20,7 +26,7 @@ try {
   const notFoundHtml = await readFile(path.join(output, "404.html"), "utf8");
   const rawHtml = await readFile(path.join(output, "raw.html"), "utf8");
   const icon = await readFile(path.join(output, "icon.svg"), "utf8");
-  const sourceIcon = await readFile(path.resolve("examples/content/icon.svg"), "utf8");
+  const sourceIcon = await readFile(path.join(exampleContent, "icon.svg"), "utf8");
   const kitchenSinkHtml = await readFile(
     path.join(output, "features/kitchen-sink/index.html"),
     "utf8"
@@ -42,13 +48,14 @@ try {
   );
   const todoScript = await readFile(path.join(output, "features/todo-app.js"), "utf8");
   const binary = await readFile(path.join(output, "assets/sample.bin"));
-  const sourceBinary = await readFile(path.resolve("examples/content/assets/sample.bin"));
+  const sourceBinary = await readFile(path.join(exampleContent, "assets/sample.bin"));
 
   assertIncludes(rootHtml, 'href="features/frontmatter/"');
   assertIncludes(rootHtml, 'href="features/mermaid/"');
   assertIncludes(rootHtml, 'href="features/kitchen-sink/"');
   assertIncludes(rootHtml, 'href="features/todo/"');
   assertIncludes(rootHtml, 'href="_astro/');
+  assertIncludes(rootHtml, `name="generator" content="Graphite Draft ${buildIdentity}"`);
   assertIncludes(kitchenSinkHtml, 'class="mermaid-diagram"');
   assertIncludes(kitchenSinkHtml, 'class="mermaid-theme-light"><svg');
   assertIncludes(kitchenSinkHtml, 'class="mermaid-theme-dark"><svg');

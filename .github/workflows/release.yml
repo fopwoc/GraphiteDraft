@@ -3,7 +3,7 @@ name: Release
 on:
   push:
     tags:
-      - "v*.*.*"
+      - "*.*.*"
 
 permissions:
   contents: read
@@ -12,8 +12,18 @@ jobs:
   verify:
     name: Verify release
     runs-on: ubuntu-latest
+    outputs:
+      version: ${{ steps.version.outputs.version }}
+      build_number: ${{ steps.version.outputs.build_number }}
     steps:
       - uses: actions/checkout@v7
+        with:
+          fetch-depth: 0
+      - name: Verify release commit
+        shell: bash
+        run: |
+          git fetch --no-tags origin main
+          git merge-base --is-ancestor "$GITHUB_SHA" origin/main
       - uses: actions/setup-node@v7
         with:
           node-version: "24"
@@ -21,22 +31,23 @@ jobs:
       - uses: oven-sh/setup-bun@v2
         with:
           bun-version: "1.3.14"
-      - name: Verify tag matches package version
-        shell: bash
-        run: |
-          if [[ ! "$GITHUB_REF_NAME" =~ ^v[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
-            echo "Release tags must use vMAJOR.MINOR.PATCH" >&2
-            exit 1
-          fi
-          expected="v$(node -p "require('./package.json').version")"
-          if [ "$GITHUB_REF_NAME" != "$expected" ]; then
-            echo "Tag $GITHUB_REF_NAME does not match package version $expected" >&2
-            exit 1
-          fi
+      - name: Resolve version from Git
+        id: version
+        run: node tools/resolve-version.mjs --write-package
+        env:
+          RELEASE_VERSION: ${{ github.ref_name }}
       - run: bun install --frozen-lockfile
       - run: bun run test
-      - name: Inspect npm package
-        run: npm pack --dry-run
+      - name: Pack npm artifact
+        run: |
+          mkdir -p artifacts
+          npm pack --workspace packages/graphite-draft --pack-destination artifacts
+      - uses: actions/upload-artifact@v6
+        with:
+          name: npm-package
+          path: artifacts/*.tgz
+          if-no-files-found: error
+          retention-days: 3
 
   publish-npm:
     name: Publish CLI to npm
@@ -46,18 +57,17 @@ jobs:
       contents: read
       id-token: write
     steps:
-      - uses: actions/checkout@v7
       - uses: actions/setup-node@v7
         with:
           node-version: "24"
           registry-url: https://registry.npmjs.org
           package-manager-cache: false
-      - uses: oven-sh/setup-bun@v2
+      - uses: actions/download-artifact@v7
         with:
-          bun-version: "1.3.14"
-      - run: bun install --frozen-lockfile
+          name: npm-package
+          path: artifacts
       - name: Publish with npm trusted publishing
-        run: npm publish
+        run: npm publish artifacts/*.tgz
 
   publish-container:
     name: Publish Docker image to GHCR
@@ -77,23 +87,25 @@ jobs:
           registry: ghcr.io
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
-      - name: Extract metadata (tags, labels) for Docker
+      - name: Extract image metadata
         id: meta
         uses: docker/metadata-action@v6
         with:
-          images: |
-            ghcr.io/${{ github.repository }}
+          images: ghcr.io/${{ github.repository }}
           tags: |
-            type=ref,event=branch
             type=semver,pattern={{version}}
             type=semver,pattern={{major}}.{{minor}}
             type=semver,pattern={{major}}
+            type=raw,value=latest
       - name: Build and push Docker image
         id: push
         uses: docker/build-push-action@v7
         with:
           context: .
           push: true
+          build-args: |
+            VERSION=${{ needs.verify.outputs.version }}
+            BUILD_NUMBER=${{ needs.verify.outputs.build_number }}
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
       - name: Attest Docker image
@@ -108,6 +120,7 @@ jobs:
     needs:
       - publish-npm
       - publish-container
+      - verify
     runs-on: ubuntu-latest
     permissions:
       contents: write
@@ -118,12 +131,20 @@ jobs:
       - name: Move major and minor aliases
         shell: bash
         run: |
-          version="${GITHUB_REF_NAME#v}"
-          major="v${version%%.*}"
-          minor="v${version%.*}"
+          version="${{ needs.verify.outputs.version }}"
+          major="${version%%.*}"
+          minor="${version%.*}"
+          legacy_major="v$major"
+          legacy_minor="v$minor"
           git tag --force "$major" "$GITHUB_SHA"
           git tag --force "$minor" "$GITHUB_SHA"
-          git push --force origin "refs/tags/$major" "refs/tags/$minor"
+          git tag --force "$legacy_major" "$GITHUB_SHA"
+          git tag --force "$legacy_minor" "$GITHUB_SHA"
+          git push --force origin \
+            "refs/tags/$major" \
+            "refs/tags/$minor" \
+            "refs/tags/$legacy_major" \
+            "refs/tags/$legacy_minor"
 
   github-release:
     name: Create GitHub Release
@@ -131,16 +152,29 @@ jobs:
       - publish-npm
       - publish-container
       - update-action-tags
+      - verify
     runs-on: ubuntu-latest
     permissions:
       contents: write
     steps:
-      - name: Create release from repository history
+      - uses: actions/checkout@v7
+        with:
+          fetch-depth: 0
+      - uses: actions/download-artifact@v7
+        with:
+          name: npm-package
+          path: artifacts
+      - name: Prepare concise release notes
+        run: node tools/create-release-notes.mjs release-notes.md
+        env:
+          RELEASE_VERSION: ${{ needs.verify.outputs.version }}
+      - name: Create GitHub Release
         run: >-
-          gh release create "$GITHUB_REF_NAME"
+          gh release create "${{ needs.verify.outputs.version }}"
+          artifacts/*.tgz
           --repo "$GITHUB_REPOSITORY"
           --verify-tag
-          --generate-notes
-          --title "Graphite Draft $GITHUB_REF_NAME"
+          --notes-file release-notes.md
+          --title "Graphite Draft ${{ needs.verify.outputs.version }}"
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}

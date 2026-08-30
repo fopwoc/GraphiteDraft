@@ -21,4 +21,4 @@ if (
   process.exit(1);
 }
 
-await import("./copy-content-assets.mjs");
+await import("./postprocess-output.mjs");

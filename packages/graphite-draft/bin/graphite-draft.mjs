@@ -16,7 +16,7 @@ if (!command || command === "help" || command === "--help" || command === "-h") 
 
 if (command === "--version" || command === "-v") {
   const packageJson = JSON.parse(await readFile(path.join(packageRoot, "package.json"), "utf8"));
-  console.log(packageJson.version);
+  console.log(process.env.GRAPHITE_VERSION || packageJson.buildIdentity || packageJson.version);
   process.exit(0);
 }
 

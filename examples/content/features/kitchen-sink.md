@@ -67,21 +67,19 @@ Use **bold**, *italic*, ***both***, ~~strikethrough~~, `inline code`,
 ## Lists
 
 1. First ordered list item
-2. Another item
-   ⋅⋅⋅⋅* Unordered sub-list.
-1. Actual numbers don't matter, just that it's a number
-   ⋅⋅⋅⋅1. Ordered sub-list
-4. And another item.
+2. A second item with nested content.
+   - Unordered child
+   - Another child
+3. A final item.
 
-⋅⋅⋅You can have properly indented paragraphs within list items. Notice the blank line above, and the leading spaces (at least one, but we'll use three here to also align the raw Markdown).
+   An indented paragraph remains attached to the final list item.
 
-⋅⋅⋅To have a line break without a paragraph, you will need to use two trailing spaces.⋅⋅
-⋅⋅⋅Note that this line is separate, but within the same paragraph.⋅⋅
-⋅⋅⋅(This is contrary to the typical GFM line break behaviour, where trailing spaces are not required.)
+   Two trailing spaces create a line break.  
+   This line stays in the same paragraph.
 
-* Unordered list can use asterisks
-- Or minuses
-+ Or pluses
+* Unordered items can use asterisks.
+- Hyphens work too.
++ Plus signs are also valid.
 
 ## Code
 
@@ -93,40 +91,26 @@ console.log(result.pages);
 ```kotlin
 import kotlinx.coroutines.*
 
-suspend fun main() {                                // A function that can be suspended and resumed later
-    val start = System.currentTimeMillis()
-    coroutineScope {                                // Create a scope for starting coroutines
-        for (i in 1..10) {
-            launch {                                // Start 10 concurrent tasks
-                delay(3000L - i * 300)              // Pause their execution
-                log(start, "Countdown: $i")
-            }
+suspend fun main() = coroutineScope {
+    val pages = listOf("index", "guide", "reference")
+    pages.map { page ->
+        async {
+            delay(25)
+            "Rendered $page"
         }
-    }
-    // Execution continues when all coroutines in the scope have finished
-    log(start, "Liftoff!")
-}
-
-fun log(start: Long, msg: String) {
-    println("$msg " +
-            "(on ${Thread.currentThread().name}) " +
-            "after ${(System.currentTimeMillis() - start)/1000F}s")
+    }.awaitAll().forEach(::println)
 }
 ```
 
 ```rust
-// This is a simple macro named `say_hello`.
-macro_rules! say_hello {
-    // `()` indicates that the macro takes no argument.
-    () => {
-        // The macro will expand into the contents of this block.
-        println!("Hello!")
+macro_rules! markdown_heading {
+    ($level:literal, $text:literal) => {
+        format!("{} {}", "#".repeat($level), $text)
     };
 }
 
 fn main() {
-    // This call will expand into `println!("Hello!")`
-    say_hello!()
+    println!("{}", markdown_heading!(2, "Generated section"));
 }
 ```
 
@@ -159,8 +143,8 @@ flowchart LR
   <dd>Does *not* work **very** well. Use HTML <em>tags</em>.</dd>
 </dl>
 
-## YouTube inline
+## Linked image
 
-[![IMAGE ALT TEXT HERE](http://img.youtube.com/vi/tYzMYcUty6s/0.jpg)](http://www.youtube.com/watch?v=tYzMYcUty6s)
+[![Open the examples](../assets/diagram.svg)](../index.md)
 
 [Back to examples](../index.md)
