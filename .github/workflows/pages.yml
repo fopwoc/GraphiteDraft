@@ -15,10 +15,10 @@ jobs:
       contents: read
     steps:
       - uses: actions/checkout@v7
-      - name: Prepare README as the home page
+      - name: Prepare documentation pages
         run: |
           mkdir -p .graphite-pages
-          cp README.md .graphite-pages/index.md
+          cp README.md AI_USAGE.md .graphite-pages/
       - name: Render README with Graphite Draft
         uses: ./
         with:

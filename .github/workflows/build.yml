@@ -38,6 +38,12 @@ jobs:
         run: node tools/resolve-version.mjs --write-package
       - run: bun install --frozen-lockfile
       - run: bun run test
+      - name: Test Pages documentation
+        run: |
+          mkdir -p .graphite-pages
+          cp README.md AI_USAGE.md .graphite-pages/
+          bun packages/graphite-draft/bin/graphite-draft.mjs \
+            build .graphite-pages "$RUNNER_TEMP/graphite-pages"
       - name: Pack npm artifact
         run: |
           mkdir -p artifacts

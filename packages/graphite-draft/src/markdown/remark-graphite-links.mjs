@@ -50,11 +50,12 @@ function getSourcePath(file) {
 function pageRoute(relativePath) {
   const withoutExtension = relativePath.replace(markdownExtension, "");
   if (withoutExtension.toLowerCase() === "404") return "404.html";
+  if (withoutExtension.toLowerCase() === "readme") return "readme/";
   const withoutIndex = withoutExtension.replace(/(^|[\\/])index$/i, "");
   const route = withoutIndex
     .split(path.sep)
     .filter(Boolean)
-    .map(encodeURIComponent)
+    .map((segment) => encodeURIComponent(segment.toLowerCase()))
     .join("/");
   return route ? `${route}/` : "";
 }

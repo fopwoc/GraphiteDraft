@@ -237,6 +237,7 @@ The page starts here.
   title is derived from the filename.
 - `draft: true` leaves the page out of the build.
 - `index.md` becomes the page for its directory.
+- A root `README.md` is published at `/readme/`.
 - `404.md` or `404.mdx` becomes a self-contained `404.html`.
 - A root `icon.svg` becomes the favicon.
 - A Markdown image title becomes a visible caption.

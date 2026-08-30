@@ -67,7 +67,7 @@ jobs:
           name: npm-package
           path: artifacts
       - name: Publish with npm trusted publishing
-        run: npm publish artifacts/*.tgz
+        run: npm publish ./artifacts/*.tgz
 
   publish-container:
     name: Publish Docker image to GHCR

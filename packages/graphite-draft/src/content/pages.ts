@@ -5,8 +5,9 @@ export type PageEntry = CollectionEntry<"pages">;
 export function routeFromId(id: string): string {
   const withoutExtension = id.replace(/\.(md|mdx)$/i, "");
   if (withoutExtension.toLowerCase() === "404") return "404.html";
+  if (withoutExtension.toLowerCase() === "readme") return "readme";
   const withoutIndex = withoutExtension.replace(/(^|\/)index$/i, "");
-  return withoutIndex.replace(/^\/+|\/+$/g, "");
+  return withoutIndex.replace(/^\/+|\/+$/g, "").toLowerCase();
 }
 
 export function titleFor(page: PageEntry): string {

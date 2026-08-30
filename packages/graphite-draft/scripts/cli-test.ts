@@ -18,6 +18,11 @@ try {
   await mkdir(valid);
   await mkdir(path.join(valid, "assets"));
   await mkdir(path.join(valid, "features"));
+  await writeFile(path.join(valid, "AI_USAGE.md"), "# AI usage\n");
+  await writeFile(
+    path.join(valid, "README.md"),
+    "# Readme\n\n[AI usage](AI_USAGE.md)\n"
+  );
   await writeFile(path.join(valid, "next.md"), "# Next\n");
   await writeFile(
     path.join(valid, "assets/diagram.svg"),
@@ -43,6 +48,10 @@ flowchart LR
   const externalFontsOutput = path.join(workspace, "external-fonts-output");
   expectStatus(["build", valid, externalFontsOutput, "--enable-external-fonts"], 0);
   const externalFontsHtml = await readFile(path.join(externalFontsOutput, "index.html"), "utf8");
+  const readmeHtml = await readFile(path.join(externalFontsOutput, "readme/index.html"), "utf8");
+  if (!readmeHtml.includes('href="../ai_usage/"')) {
+    throw new Error("README links were not rewritten relative to /readme/");
+  }
   if (!externalFontsHtml.includes("fonts.googleapis.com")) {
     throw new Error("External-font opt-in did not preserve the Mermaid font import");
   }
