@@ -48,7 +48,7 @@ jobs:
         run: |
           mkdir -p artifacts
           npm pack --workspace packages/graphite-draft --pack-destination artifacts
-      - uses: actions/upload-artifact@v6
+      - uses: actions/upload-artifact@v7
         with:
           name: npm-package
           path: artifacts/*.tgz
