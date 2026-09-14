@@ -50,7 +50,7 @@
     "happy-dom": "20.14.0",
     "html-minifier-terser": "7.2.0",
     "isomorphic-mermaid": "0.1.1",
-    "mermaid": "11.17.2",
+    "mermaid": "12.0.0",
     "sharp": "0.35.4",
     "unocss": "66.9.2",
     "zod": "4.5.4"
