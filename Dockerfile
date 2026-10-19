@@ -1,10 +1,10 @@
-FROM oven/bun:1.4.2 AS dependencies
+FROM oven/bun:1.4.3 AS dependencies
 WORKDIR /app
 COPY package.json bun.lock ./
 COPY packages/graphite-draft/package.json ./packages/graphite-draft/package.json
 RUN bun install --frozen-lockfile
 
-FROM oven/bun:1.4.2 AS builder
+FROM oven/bun:1.4.3 AS builder
 ARG VERSION=0.0.0-development
 ARG BUILD_NUMBER=0
 WORKDIR /app
