@@ -47,7 +47,7 @@
     "@astrojs/mdx": "8.0.1",
     "@unocss/astro": "66.10.5",
     "astro": "7.3.2",
-    "happy-dom": "20.14.5",
+    "happy-dom": "21.0.4",
     "html-minifier-terser": "7.2.0",
     "isomorphic-mermaid": "0.1.1",
     "mermaid": "11.17.2",
