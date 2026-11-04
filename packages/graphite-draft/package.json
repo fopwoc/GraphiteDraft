@@ -53,7 +53,7 @@
     "mermaid": "11.17.2",
     "sharp": "0.35.4",
     "unocss": "66.10.5",
-    "zod": "4.6.5"
+    "zod": "4.6.6"
   },
   "devDependencies": {
     "@astrojs/check": "0.9.10",
